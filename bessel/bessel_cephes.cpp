@@ -104,6 +104,7 @@ void bessel_jn_array(const int nmin, const int nmax, const double x, double *res
   double Jnm1;
   int n;
   
+ 
   Jnp1 = bessel_jn(nmax+1, x);
   Jn   = bessel_jn(nmax, x);
 
@@ -122,6 +123,14 @@ void bessel_jn_array(const int nmax, const double x,  double Jn,  double Jnp, do
   double Jnm1;
   int n;
   
+  if( x < 1e-6 && x > -1e-6 )
+  {
+    result_array[0] = 1.0;
+    for(n=1; n<=nmax; n++)
+      result_array[n] = 0.0;
+    return;
+  }
+
   for(n=nmax; n>=0; n--) 
   {
     result_array[n] = Jn;
@@ -134,6 +143,13 @@ void bessel_jn_array(const int nmax, const double x,  double Jn,  double Jnp, do
 
 double bessel_jnc(const int n, const double x)
 {
+  assert(n > 0);
+  if( x < 1e-6 && x > -1e-6 )
+  {
+    // NIST Handbook of Mathematical Functions, when x->0
+    return pow(0.5, (double)n)*pow(x, (double)n-1.0)/cephes_special_functions_gamma(n+1);
+  }
+  
   return bessel_jn(n, x)/x;
 }
 
@@ -202,6 +218,14 @@ double bessel_jn_integral(int n, double x)
 
 double bessel_jn_tp_integral(int n, int p, double x)
 {
+  if(std::abs(x) < 1e-10) return 0.0;
+  
+  // special case
+  if(p ==0)
+  {
+    return bessel_jn_integral(n, x);
+  }
+  
   // p > n and p-n is odd
 
   if( p > n && (p-n)%2 == 1)
@@ -281,18 +305,30 @@ double bessel_jn_tp_integral(int n, int p, double x)
 
 double bessel_j0_t1_integral(double r, double x)
 {
+  if(r < 1e-10) // r== 0.0
+    return x*x/2.0;
+
   return 1.0/(r*r)*(r*x*bessel_j1(r*x));  
 }
 
 
 double bessel_j2_t1_integral(double r, double x)
 {
+  if(r < 1e-10) // r== 0.0
+    return 0.0;
+
   return 1.0/(r*r)*(-2*bessel_j0(r*x)-r*x*bessel_j1(r*x));    
 }
 
 
 double bessel_jn_t1_integral_intp(int n, double r, double x)
 {
+  if( r < 1e-10 )  // r== 0.0
+  {
+    if( n == 0 ) return std::pow(x, 2)/2.0;
+    return 0.0;
+  }
+  
   double y = r*x/(2*M_PI);
 
   if( n>=33 ||  y > 15.0 ) 
@@ -326,6 +362,12 @@ double bessel_jn_t1_integral_intp(int n, double r, double x)
 
 void bessel_jn_t1_integral_intp(int n_max, double r, double x, double *result_array)
 {
+  if( r < 1e-10 )  // r== 0.0
+  {
+    result_array[0] = std::pow(x, 2)/2.0;
+    return;
+  }
+  
   double y = r*x/(2*M_PI);
 
   if( y > 15.0 ) return;
@@ -360,6 +402,12 @@ void bessel_jn_t1_integral_intp(int n_max, double r, double x, double *result_ar
 
 double bessel_jn_tp_integral(int n, int p, double r, double x)
 {
+  if( r < 1e-10 )  // r== 0.0
+  {
+    if( n == 0 ) return std::pow(x, p+1)/(p+1);
+    return 0.0;
+  }
+  
   return 1.0/std::pow(r, p+1) * bessel_jn_tp_integral(n, p, r*x);
 }
 
