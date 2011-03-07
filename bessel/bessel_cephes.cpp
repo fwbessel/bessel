@@ -104,7 +104,14 @@ void bessel_jn_array(const int nmin, const int nmax, const double x, double *res
   double Jnm1;
   int n;
   
- 
+  if( x < 1e-6 && x > -1e-6 )
+  {
+    result_array[0] = 1.0;
+    for(n=nmin; n<=nmax; n++)
+      result_array[n] = 0.0;
+    return;
+  }
+  
   Jnp1 = bessel_jn(nmax+1, x);
   Jn   = bessel_jn(nmax, x);
 
@@ -402,6 +409,8 @@ void bessel_jn_t1_integral_intp(int n_max, double r, double x, double *result_ar
 
 double bessel_jn_tp_integral(int n, int p, double r, double x)
 {
+  if(std::abs(x) < 1e-10) return 0.0;
+  
   if( r < 1e-10 )  // r== 0.0
   {
     if( n == 0 ) return std::pow(x, p+1)/(p+1);
