@@ -1,0 +1,11 @@
+Hi,
+
+This is bessel function evaluation and integral library based on cephes.
+Some of the algorithm comes from 
+
+Rosenheinrich, W. "Tables of some indefinite integrals of bessel functions." University of Applied Sciences, Germany (2012).
+
+Hope this library is useful.
+
+Usage: copy the C/C++ source code to your project.
+
